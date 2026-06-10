@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Recruitment Automation – Workflow Report</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+  :root {
+    --bg: #0b0f1a;
+    --surface: #111827;
+    --card: #161d2e;
+    --border: #1f2c45;
+    --accent: #4f8ef7;
+    --accent2: #7c3aed;
+    --green: #10b981;
+    --yellow: #f59e0b;
+    --red: #ef4444;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --soft: #94a3b8;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: linear-gradient(135deg, #0d1b3e 0%, #0b0f1a 60%);
+    border-bottom: 1px solid var(--border);
+    padding: 60px 48px 50px;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    width: 600px; height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(79,142,247,0.10) 0%, transparent 70%);
+    top: -200px; right: -150px;
+    pointer-events: none;
+  }
+  .header-label {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 14px;
+  }
+  header h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(28px, 4vw, 46px);
+    font-weight: 700;
+    line-height: 1.15;
+    color: #fff;
+    max-width: 780px;
+    margin-bottom: 16px;
+  }
+  header h1 span { color: var(--accent); }
+  .header-sub {
+    color: var(--soft);
+    font-size: 15px;
+    max-width: 600px;
+    margin-bottom: 32px;
+  }
+  .header-meta {
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+  .meta-item { display: flex; flex-direction: column; gap: 3px; }
+  .meta-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+  .meta-value { font-size: 14px; font-weight: 600; color: var(--soft); }
+
+  /* ── LAYOUT ── */
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 48px 80px; }
+
+  /* ── SECTION ── */
+  .section { margin-top: 64px; }
+  .section-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--accent);
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── SUMMARY CARDS ── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 16px;
+    margin-bottom: 40px;
+  }
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 22px 24px;
+  }
+  .stat-card .num {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .stat-card .num span { font-size: 18px; color: var(--accent); }
+  .stat-card .desc { font-size: 13px; color: var(--muted); }
+
+  /* ── PIPELINE ── */
+  .pipeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .stage {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 32px;
+    position: relative;
+  }
+  .stage:not(:last-child) .stage-left::after {
+    content: '';
+    position: absolute;
+    left: 23px;
+    top: 52px;
+    bottom: -32px;
+    width: 2px;
+    background: var(--border);
+  }
+  .stage-left {
+    position: relative;
+    padding-top: 6px;
+  }
+  .stage-dot {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    margin-bottom: 12px;
+    position: relative;
+    z-index: 1;
+    flex-shrink: 0;
+  }
+  .stage-dot.blue   { background: rgba(79,142,247,0.15); border: 2px solid rgba(79,142,247,0.4); }
+  .stage-dot.purple { background: rgba(124,58,237,0.15); border: 2px solid rgba(124,58,237,0.4); }
+  .stage-dot.green  { background: rgba(16,185,129,0.15); border: 2px solid rgba(16,185,129,0.4); }
+  .stage-dot.yellow { background: rgba(245,158,11,0.15); border: 2px solid rgba(245,158,11,0.4); }
+  .stage-dot.red    { background: rgba(239,68,68,0.15);  border: 2px solid rgba(239,68,68,0.4);  }
+  .stage-name {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+    line-height: 1.3;
+  }
+  .stage-num {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-top: 2px;
+  }
+  .stage-body {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin-bottom: 32px;
+  }
+  .stage-body p {
+    color: var(--soft);
+    font-size: 14px;
+    margin-bottom: 16px;
+  }
+  .stage-body p:last-child { margin-bottom: 0; }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .tag {
+    font-size: 12px;
+    padding: 4px 12px;
+    border-radius: 99px;
+    font-weight: 500;
+  }
+  .tag.blue   { background: rgba(79,142,247,0.12); color: #7ab4ff; border: 1px solid rgba(79,142,247,0.25); }
+  .tag.green  { background: rgba(16,185,129,0.12); color: #34d399; border: 1px solid rgba(16,185,129,0.25); }
+  .tag.purple { background: rgba(124,58,237,0.12); color: #a78bfa; border: 1px solid rgba(124,58,237,0.25); }
+  .tag.yellow { background: rgba(245,158,11,0.12); color: #fbbf24; border: 1px solid rgba(245,158,11,0.25); }
+  .tag.red    { background: rgba(239,68,68,0.12);  color: #fca5a5; border: 1px solid rgba(239,68,68,0.25);  }
+
+  /* ── DECISION MATRIX ── */
+  .matrix {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .matrix table { width: 100%; border-collapse: collapse; }
+  .matrix th {
+    text-align: left;
+    padding: 14px 20px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    background: rgba(255,255,255,0.02);
+    border-bottom: 1px solid var(--border);
+  }
+  .matrix td {
+    padding: 14px 20px;
+    font-size: 13.5px;
+    color: var(--soft);
+    border-bottom: 1px solid rgba(31,44,69,0.5);
+    vertical-align: top;
+  }
+  .matrix tr:last-child td { border-bottom: none; }
+  .matrix td:first-child { font-weight: 500; color: var(--text); }
+  .badge {
+    display: inline-block;
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 99px;
+    font-weight: 600;
+  }
+  .badge.g { background: rgba(16,185,129,0.15); color: #34d399; }
+  .badge.r { background: rgba(239,68,68,0.15);  color: #fca5a5; }
+  .badge.y { background: rgba(245,158,11,0.15); color: #fbbf24; }
+
+  /* ── TECH STACK ── */
+  .tech-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+  }
+  .tech-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 22px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  .tech-icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .tech-icon.blue   { background: rgba(79,142,247,0.15); }
+  .tech-icon.green  { background: rgba(16,185,129,0.15); }
+  .tech-icon.purple { background: rgba(124,58,237,0.15); }
+  .tech-icon.yellow { background: rgba(245,158,11,0.15); }
+  .tech-icon.red    { background: rgba(239,68,68,0.15);  }
+  .tech-name { font-weight: 600; font-size: 14px; color: var(--text); margin-bottom: 4px; }
+  .tech-desc { font-size: 12.5px; color: var(--muted); }
+
+  /* ── TIMELINE ── */
+  .timeline { display: flex; flex-direction: column; gap: 0; }
+  .tl-item {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    gap: 24px;
+    position: relative;
+    padding-bottom: 28px;
+  }
+  .tl-item:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: 159px;
+    top: 8px; bottom: 0;
+    width: 1px;
+    background: var(--border);
+  }
+  .tl-left { text-align: right; }
+  .tl-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--accent);
+    position: absolute;
+    left: 155px;
+    top: 6px;
+  }
+  .tl-label { font-size: 12px; color: var(--muted); font-weight: 500; padding-top: 2px; }
+  .tl-right h4 { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; padding-top: 0; }
+  .tl-right p  { font-size: 13px; color: var(--muted); }
+
+  /* ── BENEFITS ── */
+  .benefits-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+  }
+  .benefit-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 22px 24px;
+  }
+  .benefit-card .bicon { font-size: 22px; margin-bottom: 10px; }
+  .benefit-card h4 { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+  .benefit-card p  { font-size: 13px; color: var(--muted); }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 24px 48px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  @media (max-width: 700px) {
+    header { padding: 40px 24px 36px; }
+    .container { padding: 0 24px 60px; }
+    .stage { grid-template-columns: 1fr; }
+    .stage-left { display: flex; gap: 12px; align-items: center; }
+    .stage-left::after { display: none !important; }
+    .tl-item { grid-template-columns: 1fr; }
+    .tl-left { text-align: left; }
+    .tl-item::before, .tl-dot { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-label">Automation Workflow Documentation</div>
+  <h1>AI <span>Recruitment Process</span> Automation</h1>
+  <p class="header-sub">An end-to-end automated hiring pipeline for SpacECE India Foundation — from job application intake to offer letter dispatch, built on n8n with Google Workspace and AI intelligence.</p>
+  <div class="header-meta">
+    <div class="meta-item"><span class="meta-label">Platform</span><span class="meta-value">n8n (self-hosted)</span></div>
+    <div class="meta-item"><span class="meta-label">AI Engine</span><span class="meta-value">Google Gemini (PaLM)</span></div>
+    <div class="meta-item"><span class="meta-label">Organisation</span><span class="meta-value">SpacECE India Foundation</span></div>
+    <div class="meta-item"><span class="meta-label">Total Pipeline Stages</span><span class="meta-value">6 Major Stages</span></div>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- KPIs -->
+  <div class="section">
+    <div class="section-title">At a Glance</div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="num">6<span> stages</span></div>
+        <div class="desc">End-to-end interview pipeline</div>
+      </div>
+      <div class="stat-card">
+        <div class="num">3<span> calendars</span></div>
+        <div class="desc">Auto-tracked for Assessment, HR & Domain rounds</div>
+      </div>
+      <div class="stat-card">
+        <div class="num">0<span> manual</span></div>
+        <div class="desc">Emails sent — all automated via Gmail</div>
+      </div>
+      <div class="stat-card">
+        <div class="num">AI<span> scored</span></div>
+        <div class="desc">Every resume is scored 1–10 by an HR expert AI</div>
+      </div>
+      <div class="stat-card">
+        <div class="num">3<span> outcomes</span></div>
+        <div class="desc">Approve / Decline / Absent — handled at every round</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PIPELINE STAGES -->
+  <div class="section">
+    <div class="section-title">Pipeline Walkthrough</div>
+    <div class="pipeline">
+
+      <!-- Stage 1 -->
+      <div class="stage">
+        <div class="stage-left">
+          <div class="stage-dot blue">📥</div>
+          <div>
+            <div class="stage-name">Application Intake &amp; Eligibility Check</div>
+            <div class="stage-num">Stage 1</div>
+          </div>
+        </div>
+        <div class="stage-body">
+          <p>A candidate submits a job application form (via Google Forms / webhook). The system immediately fetches the latest record from Google Sheets, extracts the candidate's details (name, email, phone, job role, device availability), and identifies the matching role requirements from a separate role configuration sheet.</p>
+          <p>An <strong>AI Agent</strong> (powered by Google Gemini) then compares the candidate's profile against mandatory requirements for the role — such as whether a laptop, smartphone, or internet connection is required. If any mandatory condition is unmet, a professional rejection email is auto-sent and the pipeline terminates for that candidate.</p>
+          <div class="tag-row">
+            <span class="tag blue">Webhook trigger</span>
+            <span class="tag blue">Google Sheets lookup</span>
+            <span class="tag purple">Gemini AI eligibility check</span>
+            <span class="tag red">Auto-reject if ineligible</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stage 2 -->
+      <div class="stage">
+        <div class="stage-left">
+          <div class="stage-dot purple">🤖</div>
+          <div>
+            <div class="stage-name">AI Resume Analysis &amp; Scoring</div>
+            <div class="stage-num">Stage 2</div>
+          </div>
+        </div>
+        <div class="stage-body">
+          <p>If the candidate passes eligibility, their resume PDF is downloaded from Google Drive and parsed by three parallel AI components:</p>
+          <p><strong>Qualifications Extractor</strong> — summarises education history, job experience, and technical skills in bullet form. <strong>Personal Data Extractor</strong> — pulls phone, city, and birthdate. <strong>HR Expert Scorer</strong> — receives the candidate summary alongside the job profile description, then issues a numeric vote (1–10) and written consideration explaining the score.</p>
+          <p>All extracted data and the AI score are appended to a "Resume Analysis" tab in Google Sheets for HR review, and an HR confirmation email is sent with Approve / Reject buttons embedded.</p>
+          <div class="tag-row">
+            <span class="tag purple">PDF extraction</span>
+            <span class="tag purple">AI qualification extraction</span>
+            <span class="tag purple">AI 1–10 HR scoring</span>
+            <span class="tag blue">Google Sheets logging</span>
+            <span class="tag yellow">HR approval email</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stage 3 -->
+      <div class="stage">
+        <div class="stage-left">
+          <div class="stage-dot yellow">📅</div>
+          <div>
+            <div class="stage-name">Assessment Round</div>
+            <div class="stage-num">Stage 3</div>
+          </div>
+        </div>
+        <div class="stage-body">
+          <p>If HR approves the resume, the candidate receives an email with a Google Calendar booking link to schedule their Assessment Round. Once the booking is detected (Google Calendar trigger), the system validates the Candidate ID embedded in the calendar event description.</p>
+          <p>If the ID is missing, a clarification email is sent and the invalid calendar event is deleted. If valid, both the candidate and the assigned HR receive confirmation emails with meeting details (date, time, Google Meet link). After the interview, the system emails the HR a feedback form (Approved / Declined / Absent dropdown) and waits for the response. The decision is recorded in Google Sheets and the candidate is notified accordingly. If absent, a rebook link is offered.</p>
+          <div class="tag-row">
+            <span class="tag yellow">Google Calendar trigger</span>
+            <span class="tag blue">Candidate ID validation</span>
+            <span class="tag yellow">HR feedback form</span>
+            <span class="tag green">Approve → advance to HR Round</span>
+            <span class="tag red">Decline / Absent → email sent</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stage 4 -->
+      <div class="stage">
+        <div class="stage-left">
+          <div class="stage-dot green">👤</div>
+          <div>
+            <div class="stage-name">HR Round</div>
+            <div class="stage-num">Stage 4</div>
+          </div>
+        </div>
+        <div class="stage-body">
+          <p>Candidates who clear the Assessment Round receive a booking link for the HR Round. The exact same validated scheduling flow from Stage 3 repeats — calendar booking detection, Candidate ID check, confirmation emails to both parties, and post-interview HR feedback collection.</p>
+          <p>Upon HR approval, the candidate is directed to book the final Domain Round. Declines and absences trigger appropriate emails, and Google Sheets is updated at every decision point.</p>
+          <div class="tag-row">
+            <span class="tag yellow">Google Calendar trigger</span>
+            <span class="tag blue">Same flow as Assessment</span>
+            <span class="tag green">Approve → advance to Domain Round</span>
+            <span class="tag red">Decline / Absent → email sent</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stage 5 -->
+      <div class="stage">
+        <div class="stage-left">
+          <div class="stage-dot red">🧠</div>
+          <div>
+            <div class="stage-name">Domain (Technical) Round</div>
+            <div class="stage-num">Stage 5</div>
+          </div>
+        </div>
+        <div class="stage-body">
+          <p>The Domain Round follows the same automated scheduling and feedback loop. After approval, the system determines whether the selected role is an Internship or a direct Employee position, and branches accordingly.</p>
+          <p>For <strong>interns</strong>: a welcome email is sent, the candidate is marked as Selected in Google Sheets, a joining date is calculated (day after interview), joining details are emailed, an Offer Letter is auto-generated in HTML, converted to PDF, and emailed with the actual joining date. HR separately confirms the actual joining via an interactive email form.</p>
+          <div class="tag-row">
+            <span class="tag green">Approved → offer letter generated</span>
+            <span class="tag purple">HTML → PDF conversion</span>
+            <span class="tag blue">Joining date calculation</span>
+            <span class="tag red">Decline / Absent → email sent</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stage 6 -->
+      <div class="stage">
+        <div class="stage-left">
+          <div class="stage-dot green">🎓</div>
+          <div>
+            <div class="stage-name">Internship Lifecycle &amp; Progression</div>
+            <div class="stage-num">Stage 6</div>
+          </div>
+        </div>
+        <div class="stage-body">
+          <p>After an intern joins, the system waits 3 months (using a time-based Wait node). At completion, an internship-end email is sent requesting a task report submission, and the Google Sheets record is updated to "Internship Completed: Yes."</p>
+          <p>HR is then asked via an automated email whether to advance the intern to <strong>Traineeship</strong>. If yes, the candidate is notified of the traineeship selection; if no, a professional decline is sent. After the traineeship period, HR is asked again whether to promote to <strong>Employee</strong>. Promotion or decline emails are dispatched automatically, and the record updated throughout.</p>
+          <div class="tag-row">
+            <span class="tag yellow">3-month wait node</span>
+            <span class="tag yellow">Internship → Traineeship decision</span>
+            <span class="tag yellow">Traineeship → Employee decision</span>
+            <span class="tag blue">Full lifecycle tracking in Sheets</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- DECISION MATRIX -->
+  <div class="section">
+    <div class="section-title">Decision Outcomes at Each Round</div>
+    <div class="matrix">
+      <table>
+        <thead>
+          <tr>
+            <th>Round</th>
+            <th>Approved</th>
+            <th>Declined</th>
+            <th>Absent</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Eligibility (AI)</td>
+            <td><span class="badge g">Proceeds to resume analysis</span></td>
+            <td><span class="badge r">Instant rejection email sent</span></td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td>Resume Review (HR)</td>
+            <td><span class="badge g">Assessment booking link sent</span></td>
+            <td><span class="badge r">Rejection email sent to candidate</span></td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td>Assessment Round</td>
+            <td><span class="badge g">HR Round booking link sent</span></td>
+            <td><span class="badge r">Decline email sent</span></td>
+            <td><span class="badge y">Rebook email with link</span></td>
+          </tr>
+          <tr>
+            <td>HR Round</td>
+            <td><span class="badge g">Domain Round booking link sent</span></td>
+            <td><span class="badge r">Decline email sent</span></td>
+            <td><span class="badge y">Rebook email with link</span></td>
+          </tr>
+          <tr>
+            <td>Domain (Technical) Round</td>
+            <td><span class="badge g">Welcome + Offer Letter emailed</span></td>
+            <td><span class="badge r">Decline email sent</span></td>
+            <td><span class="badge y">Rebook email with link</span></td>
+          </tr>
+          <tr>
+            <td>Traineeship Review</td>
+            <td><span class="badge g">Traineeship selection email</span></td>
+            <td><span class="badge r">Decline email to candidate</span></td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td>Employee Promotion</td>
+            <td><span class="badge g">Employment confirmation email</span></td>
+            <td><span class="badge r">Decline email to candidate</span></td>
+            <td>—</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TECH STACK -->
+  <div class="section">
+    <div class="section-title">Technology Stack</div>
+    <div class="tech-grid">
+      <div class="tech-card">
+        <div class="tech-icon blue">⚙️</div>
+        <div>
+          <div class="tech-name">n8n (Workflow Engine)</div>
+          <div class="tech-desc">Self-hosted automation platform orchestrating all nodes, triggers, and logic.</div>
+        </div>
+      </div>
+      <div class="tech-card">
+        <div class="tech-icon purple">🧠</div>
+        <div>
+          <div class="tech-name">Google Gemini (PaLM API)</div>
+          <div class="tech-desc">Powers eligibility AI agent, resume extraction, qualification parsing, and HR scoring.</div>
+        </div>
+      </div>
+      <div class="tech-card">
+        <div class="tech-icon green">📊</div>
+        <div>
+          <div class="tech-name">Google Sheets</div>
+          <div class="tech-desc">Central data store — candidate records, role requirements, HR assignments, and status tracking.</div>
+        </div>
+      </div>
+      <div class="tech-card">
+        <div class="tech-icon blue">📧</div>
+        <div>
+          <div class="tech-name">Gmail (OAuth2)</div>
+          <div class="tech-desc">Sends all candidate and HR emails including interactive "Send & Wait" approval forms.</div>
+        </div>
+      </div>
+      <div class="tech-card">
+        <div class="tech-icon yellow">📅</div>
+        <div>
+          <div class="tech-name">Google Calendar</div>
+          <div class="tech-desc">Three calendars (Assessment, HR Round, Domain Round) used as event-driven triggers.</div>
+        </div>
+      </div>
+      <div class="tech-card">
+        <div class="tech-icon green">📁</div>
+        <div>
+          <div class="tech-name">Google Drive</div>
+          <div class="tech-desc">Resume PDF storage — files are downloaded on the fly for AI parsing.</div>
+        </div>
+      </div>
+      <div class="tech-card">
+        <div class="tech-icon red">📄</div>
+        <div>
+          <div class="tech-name">HTML → PDF Converter</div>
+          <div class="tech-desc">Offer letter generated in HTML, converted to PDF, and emailed to selected candidates.</div>
+        </div>
+      </div>
+      <div class="tech-card">
+        <div class="tech-icon purple">🔗</div>
+        <div>
+          <div class="tech-name">Webhook (n8n)</div>
+          <div class="tech-desc">Entry point that receives Google Form submissions via HTTP POST and fires the pipeline.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KEY BENEFITS -->
+  <div class="section">
+    <div class="section-title">Key Benefits for Your Organisation</div>
+    <div class="benefits-grid">
+      <div class="benefit-card">
+        <div class="bicon">⚡</div>
+        <h4>Zero Manual Follow-Up</h4>
+        <p>Every email — confirmation, rejection, rebook request, offer letter — is sent automatically without any HR action needed.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="bicon">🎯</div>
+        <h4>AI-Powered Screening</h4>
+        <p>Candidates are scored and assessed against job-specific criteria by an AI model before any human reviews them, saving hours per hire.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="bicon">📋</div>
+        <h4>Full Audit Trail</h4>
+        <p>Every decision, round outcome, joining date, and status is recorded in Google Sheets — giving complete visibility over the hiring funnel.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="bicon">🔁</div>
+        <h4>Consistent Candidate Experience</h4>
+        <p>Every applicant receives the same professional communication sequence, regardless of which HR person is assigned to the role.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="bicon">📈</div>
+        <h4>Lifecycle Management</h4>
+        <p>Goes beyond hiring — tracks internship completion, trainee promotion, and employee conversion, all automatically.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="bicon">🛡️</div>
+        <h4>Smart Error Handling</h4>
+        <p>Invalid Candidate IDs, missing calendar data, or unmatched records trigger clarification emails and calendar cleanup automatically.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- CANDIDATE JOURNEY TIMELINE -->
+  <div class="section">
+    <div class="section-title">Candidate Journey at a Glance</div>
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-left"><span class="tl-label">Step 1</span></div>
+        <div class="tl-dot"></div>
+        <div class="tl-right">
+          <h4>Submits Application Form</h4>
+          <p>Webhook fires; candidate record fetched from Google Sheets; AI checks eligibility against role requirements.</p>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-left"><span class="tl-label">Step 2</span></div>
+        <div class="tl-dot"></div>
+        <div class="tl-right">
+          <h4>Resume Analysed by AI</h4>
+          <p>PDF downloaded, parsed for qualifications and personal data, scored 1–10 by Gemini HR Expert agent.</p>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-left"><span class="tl-label">Step 3</span></div>
+        <div class="tl-dot"></div>
+        <div class="tl-right">
+          <h4>HR Reviews &amp; Approves Resume</h4>
+          <p>HR receives an interactive email; clicks Approve or Reject. Status updated in Sheets instantly.</p>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-left"><span class="tl-label">Step 4</span></div>
+        <div class="tl-dot"></div>
+        <div class="tl-right">
+          <h4>Books &amp; Attends Assessment Round</h4>
+          <p>Candidate books slot via calendar link; receives Google Meet confirmation. Post-interview outcome captured from HR.</p>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-left"><span class="tl-label">Step 5</span></div>
+        <div class="tl-dot"></div>
+        <div class="tl-right">
+          <h4>Books &amp; Attends HR Round</h4>
+          <p>Same automated flow as Assessment. HR submits decision; candidate progresses or is thanked and exited.</p>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-left"><span class="tl-label">Step 6</span></div>
+        <div class="tl-dot"></div>
+        <div class="tl-right">
+          <h4>Books &amp; Attends Domain Round</h4>
+          <p>Technical/domain interview scheduled and conducted. On approval, candidate type (Intern or Employee) is determined.</p>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-left"><span class="tl-label">Step 7</span></div>
+        <div class="tl-dot"></div>
+        <div class="tl-right">
+          <h4>Receives Offer Letter</h4>
+          <p>Welcome email sent, joining date calculated, offer letter auto-generated as PDF and emailed. HR confirms actual joining date.</p>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-left"><span class="tl-label">Step 8+</span></div>
+        <div class="tl-dot"></div>
+        <div class="tl-right">
+          <h4>Internship → Traineeship → Employee</h4>
+          <p>System waits 3 months, notifies completion, and manages progression decisions between HR and candidate automatically.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  AI Recruitment Automation — SpacECE India Foundation &nbsp;|&nbsp; Built with n8n + Google Workspace + Gemini AI
+</footer>
+
+</body>
+</html>
